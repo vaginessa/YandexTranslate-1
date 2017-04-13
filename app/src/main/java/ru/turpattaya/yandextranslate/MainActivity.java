@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,13 +19,18 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+import static ru.turpattaya.yandextranslate.API.KEY_YANDEX_API;
 
-    private TextView inLanguage;
-    private TextView outLanguage;
+
+public class MainActivity extends AppCompatActivity /*implements Callback*/ {
+
+    private TextView inLanguageToolbar;
+    private TextView outLanguageToolbar;
+    private ImageView translateDirectionToolbar;
 
     private EditText etIn;
     private TextView tvOut;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,30 +46,31 @@ public class MainActivity extends AppCompatActivity {
 
         etIn = (EditText) findViewById(R.id.main_edit_text_in);
         tvOut = (TextView) findViewById(R.id.main_text_out);
-        inLanguage = (TextView) findViewById(R.id.text_history_in_lang);
-        outLanguage = (TextView) findViewById(R.id.text_history_out_lang);
+        inLanguageToolbar = (TextView) findViewById(R.id.main_toolbar_translate_from);
+        outLanguageToolbar = (TextView) findViewById(R.id.main_toolbar_translate_to);
+        translateDirectionToolbar = (ImageView) findViewById(R.id.main_toolbar_translate_direction);
 
         loadTranslate();
 
     }
 
     private void loadTranslate() {
-        API api = new API();
-        String croco = "Что это такое";
-        api.requestTranslation(croco, new Callback<List<JsonTranslate>>() {
+
+        API api = new API(KEY_YANDEX_API);
+
+        api.requestTranslation("Что это такое", "ru-en", new Callback<JsonTranslate>() {
             @Override
-            public void onResponse(Call<List<JsonTranslate>> call, Response<List<JsonTranslate>> response) {
+            public void onResponse(Call<JsonTranslate> call, Response<JsonTranslate> response) {
                 Log.d("Valo", "onResponse");
                 if (response != null) {
-                    tvOut.setText(String.valueOf(response.body()));
-              /* CampaignAdapter adapter = new CampaignAdapter(CampaignsActivity.this, response.body());
+                    Log.d("happy", response.body().getText().get(0));
+                    tvOut.setText(response.body().getText().get(0));
 
-                 listViewCampaigns.setAdapter(adapter);*/
                 }
             }
 
             @Override
-            public void onFailure(Call<List<JsonTranslate>> call, Throwable t) {
+            public void onFailure(Call<JsonTranslate> call, Throwable t) {
                 Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
                 Log.d("Valo", "onFailure " +  t.getMessage());
             }
@@ -91,24 +98,23 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intentFavorite);
         }
 
-
-        /*switch (item.getItemId()) {
-            case R.id.category_islands:
-                helper = new MySQLiteHelper(this);
-                Cursor cursorSort = helper.getReadableDatabase().query(
-                        ExcursionTable.TABLE_EXCURSION,
-                        null,
-                        ExcursionTable.COLUMN_EXCURSION_CATEGORYID + " =?",
-                        new String[]{String.valueOf(1)},
-                        null,
-                        null,
-                        null,
-                        orderBy
-                );
-                ExcursionAdapter adapter = new ExcursionAdapter(this, cursorSort);
-                listExcursion.setAdapter(adapter);
-                return true;
-        }*/
         return super.onOptionsItemSelected(item);
     }
+
+  /*  @Override
+    public void onResponse(Call call, Response response) {
+        Object body = response.body();
+        if(body instanceof JsonTranslate)
+        Log.d("happy", "Dictionary");
+    else if(body instanceof JsonTranslate)
+        Log.d("happy", "Translate");
+    else
+        Log.d("happy", "wtf?");
+    }
+
+    @Override
+    public void onFailure(Call call, Throwable t) {
+        Log.d("valo", "onFailure wtf?");
+
+    }*/
 }

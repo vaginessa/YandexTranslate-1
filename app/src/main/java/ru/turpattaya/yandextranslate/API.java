@@ -3,9 +3,6 @@ package ru.turpattaya.yandextranslate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.util.Arrays;
-import java.util.List;
-
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
@@ -15,11 +12,16 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 
 public class API {
-    static String KEY = "trnsl.1.1.20170411T091433Z.6c7492b689a517b9.a71ebefe6b9a2658af4b6bfa30a1a5ca8a524ee0";
-    /*https://translate.yandex.net/api/v1.5/tr.json/translate?key=trnsl.1.1.20170411T091433Z.6c7492b689a517b9.a71ebefe6b9a2658af4b6bfa30a1a5ca8a524ee0&text=крокодил&lang=ru-en*/
+    public static String KEY_YANDEX_API = "trnsl.1.1.20170411T091433Z.6c7492b689a517b9.a71ebefe6b9a2658af4b6bfa30a1a5ca8a524ee0";
 
-    void requestTranslation(String somethingForTranslate, Callback<List<JsonTranslate>> callback) {
+    public API(String KEY) {
+        this.KEY_YANDEX_API = KEY;
 
+    }
+
+
+
+    void requestTranslation(String textIn, String translateDirection,  Callback<JsonTranslate> callback) {
 
          HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
 // set your desired log level
@@ -37,7 +39,7 @@ public class API {
                 .build();
         ServiceTranslate service = retrofit.create(ServiceTranslate.class);
 
-        Call<List<JsonTranslate>> call = service.getTranslatedText(KEY, Arrays.asList(new String[]{"крокодил пошел гулять"}), "ru-en");
+        Call<JsonTranslate> call = service.getTranslatedText(KEY_YANDEX_API, textIn, translateDirection);
         call.enqueue(callback);
     }
 }
