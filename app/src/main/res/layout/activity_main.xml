@@ -3,63 +3,16 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/main_app_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.NoActionBar">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar_main"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                >
-
-                <TextView
-                    android:id="@+id/main_toolbar_translate_from"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:hint="Русский"
-                    android:layout_gravity="center"
-                    android:textStyle="bold"
-                    />
-
-                <ImageView
-                    android:id="@+id/main_toolbar_translate_direction"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_compare_arrows_black_24dp"
-                    android:layout_marginStart="15dp"
-                    android:layout_gravity="center"
-                    android:layout_marginEnd="15dp"/>
-
-                <TextView
-                    android:id="@+id/main_toolbar_translate_to"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:hint="Английский"
-                    android:layout_gravity="center"
-                    android:textStyle="bold"/>
-
-            </LinearLayout>
-
-        </android.support.v7.widget.Toolbar>
-
-    </android.support.design.widget.AppBarLayout>
+   <include layout="@layout/app_bar_main"
+       android:id="@+id/main_app_bar"/>
 
     <android.support.v7.widget.CardView
         android:id="@+id/card_view"
         android:layout_width="fill_parent"
         android:layout_height="110dp"
-        android:layout_gravity="center"
         android:layout_margin="10dp"
+        android:layout_gravity="center"
+
         android:layout_below="@+id/main_app_bar"
         card_view:cardCornerRadius="2dp"
         card_view:contentPadding="10dp"
@@ -99,10 +52,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
-
-
         </RelativeLayout>
     </android.support.v7.widget.CardView>
 
+    <TextView
+        android:id="@+id/main_text_out"
+        android:layout_margin="10dp"
+        android:hint="Hi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/card_view"/>
 
 </RelativeLayout>

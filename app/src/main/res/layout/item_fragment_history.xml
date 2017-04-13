@@ -6,7 +6,7 @@
     android:layout_marginEnd="15dp">
 
     <ImageView
-        android:id="@+id/image_favor_icon"
+        android:id="@+id/image_history_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_not_favorite_24dp"
@@ -17,17 +17,17 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:orientation="vertical"
-        android:layout_toEndOf="@+id/image_favor_icon"
+        android:layout_toEndOf="@+id/image_history_icon"
         android:layout_marginStart="10dp">
 
     <TextView
-        android:id="@+id/text_in_lang"
+        android:id="@+id/text_history_in_lang"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Language"/>
 
     <TextView
-        android:id="@+id/text_out_lang"
+        android:id="@+id/text_history_out_lang"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Язык"
@@ -35,7 +35,7 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/text_translation_direction"
+        android:id="@+id/text_history_translation_direction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="eng - rus"

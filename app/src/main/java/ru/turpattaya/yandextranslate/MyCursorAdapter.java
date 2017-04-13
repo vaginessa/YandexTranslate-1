@@ -2,17 +2,17 @@ package ru.turpattaya.yandextranslate;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+//Непонятно что делать с иконкой избранное , то ли здесь ее как-то заенять, то-ли новый адаптер для избранного создавать, а потом в коде как то
 
-public class HistoryAdapter extends CursorAdapter {
+public class MyCursorAdapter extends CursorAdapter {
 
-
-    public HistoryAdapter(Context context, Cursor c) {
+    public MyCursorAdapter(Context context, Cursor c) {
         super(context, c, 0);
     }
 
@@ -28,32 +28,18 @@ public class HistoryAdapter extends CursorAdapter {
         row.setTag(holder);
 
         return row;
-
     }
-    private void populateViewHistory(ViewHolderItem holder, Cursor cursor, Context context, View view){
+
+    private void populateView(ViewHolderItem holder, Cursor cursor, Context context) {
         holder.textInHistory.setText(cursor.getString(cursor.getColumnIndex(HistoryTable.COLUMN_HISTORY_TEXTIN)));
         holder.textOutHistory.setText(cursor.getString(cursor.getColumnIndex(HistoryTable.COLUMN_HISTORY_TEXTOUT)));
         holder.textTranslationDirectionHistory.setText(cursor.getString(cursor.getColumnIndex(HistoryTable.COLUMN_HISTORY_TRANSLATE_DIRECTION)));
-
-        //Непонятно как реализовать отбор избранных будет делаться модификацией where is_favorite='true'
-
-        /*final long id = cursor.getLong(cursor.getColumnIndex(ExcursionTable.COLUMN_EXCURSION_ID));*/
-
-       /* view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d("Valo", "got it! -> " + id);
-                Intent intent = new Intent(context, ExcursionDetailActivity.class);
-                intent.putExtra("id", id);
-                context.startActivity(intent);
-            }
-        });*/
-
     }
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         ViewHolderItem holder = (ViewHolderItem) view.getTag();
-        populateViewHistory(holder, cursor, context, view);
+        populateView(holder, cursor, context);
     }
 }
+

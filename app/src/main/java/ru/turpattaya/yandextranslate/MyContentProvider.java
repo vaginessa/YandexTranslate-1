@@ -1,5 +1,6 @@
 package ru.turpattaya.yandextranslate;
 
+import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
@@ -12,7 +13,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 
-public class ContentProvider extends android.content.ContentProvider {
+public class MyContentProvider extends ContentProvider {
 
 /*
     public static final String CONTENT_AUTHORITY = "com.nocompany.articlesflarmentpuresqlite.articles";
@@ -21,11 +22,11 @@ public class ContentProvider extends android.content.ContentProvider {
 
 
     public static final Uri CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY + "/history");
-
+    //чтобы определить запрос к  таблице или к конкретной строке создадим константы
     public static final int ALL_ROWS = 1;
     public static final int SINGLE_ROW = 2;
 
-    public static final UriMatcher matcher;
+    public static final UriMatcher matcher; //все сделает за нас
     static  {
         matcher = new UriMatcher(UriMatcher.NO_MATCH);
         matcher.addURI(CONTENT_AUTHORITY, "history", ALL_ROWS);
@@ -33,7 +34,7 @@ public class ContentProvider extends android.content.ContentProvider {
     }
 
     private MySQLiteHelper helper;
-
+//проинициализируем Content Provider
     @Override
     public boolean onCreate() {
         helper = new MySQLiteHelper(getContext());
@@ -45,14 +46,14 @@ public class ContentProvider extends android.content.ContentProvider {
     public String getType(@NonNull Uri uri) {
         switch (matcher.match(uri)) {
             case ALL_ROWS:
-                return "vnd.android.cursor.dir/articles";
+                return "vnd.android.cursor.dir/history"; //dir - набор строк
             case SINGLE_ROW:
-                return "vnd.android.cursor.item/articles";
+                return "vnd.android.cursor.item/history"; // item - одна строка
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
     }
-
+//преобразовываем uri в SQLite , получаем курсор
     @Nullable
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
@@ -66,7 +67,7 @@ public class ContentProvider extends android.content.ContentProvider {
                 break;
         }
 
-    /*    db.rawQuery(sql запрос) можно сделатьи так код выше*/
+    /*    db.rawQuery(sql запрос) можно сделать и так код выше*/
 
         return builder.query(
                 db,
@@ -83,30 +84,31 @@ public class ContentProvider extends android.content.ContentProvider {
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
         SQLiteDatabase db = helper.getWritableDatabase();
+        //получаем id строки, которую вставили в db
         long id = db.insert(
                 HistoryTable.TABLE_HISTORY,
                 null,
                 values
         );
+        //возвращаем uri вставленной записи
         if (id >= 0) {
             Uri inserted = ContentUris.withAppendedId(CONTENT_URI, id);
-            //content://.../articles/66
             getContext().getContentResolver().notifyChange(inserted, null);
             return inserted;
         } else
             return null;
     }
-
+// возвращаем колличество удаленных записей
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
         SQLiteDatabase db = helper.getWritableDatabase();
         switch (matcher.match(uri)) {
             case SINGLE_ROW:
                 String rowId = uri.getPathSegments().get(1);
+                //если selection не пустой, тогда мы добавляем к строке ниже " AND (", старый selection b " )"
+                //если selection пустой, тогда мы добавляем пустую строку
                 selection = HistoryTable.COLUMN_HISTORY_ID + "=" + rowId
                         + ( !TextUtils.isEmpty(selection) ? " AND (" +selection + " )" :"");
-                //delete from articles where age > 12;
-                //delete from articles where id = 444 and (age > 12)
                 break;
         }
         int deleteCount = db.delete(
@@ -114,6 +116,7 @@ public class ContentProvider extends android.content.ContentProvider {
                 selection,
                 selectionArgs
         );
+        //если мы чего-то удалили, то нам нужно уведомить о том, что таблица изменилась
         if (deleteCount > 0) {
             getContext().getContentResolver().notifyChange(uri, null) ;
         }
@@ -148,10 +151,5 @@ public class ContentProvider extends android.content.ContentProvider {
     @Override
     public ContentProviderResult[] applyBatch(@NonNull ArrayList<ContentProviderOperation> operations) throws OperationApplicationException {
         return super.applyBatch(operations);
-    }*/
-
-    /*    @Override
-    public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
-        return super.bulkInsert(uri, values);
     }*/
 }

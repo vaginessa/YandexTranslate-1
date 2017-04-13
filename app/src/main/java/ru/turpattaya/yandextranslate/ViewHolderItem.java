@@ -10,8 +10,8 @@ import android.widget.TextView;
 public class ViewHolderItem {
 
         public ImageView imageFavoriteIcon;
-        public TextView textInLanguage;
-        public TextView textOutLanguage;
-        public TextView textTranslationDirection;
+        public TextView textInHistory;
+        public TextView textOutHistory;
+        public TextView textTranslationDirectionHistory;
 
 }
