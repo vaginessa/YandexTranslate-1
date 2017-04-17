@@ -11,7 +11,7 @@ public class HistoryTable {
     public static final String COLUMN_HISTORY_TEXTIN = "textIn";
     public static final String COLUMN_HISTORY_TEXTOUT = "textOut";
     public static final String COLUMN_HISTORY_TRANSLATE_DIRECTION = "translateDirection";
-    /*public static final int DIRECTION_IS_FAVORITE = 0;*/
+    public static final Boolean DIRECTION_IS_FAVORITE = false;
 
 
     private static final String HISTORY_CREATE = "create table "
@@ -23,9 +23,9 @@ public class HistoryTable {
             + COLUMN_HISTORY_TEXTOUT
             + " text not null, "
             + COLUMN_HISTORY_TRANSLATE_DIRECTION
-            + " text not null "
-           /* + DIRECTION_IS_FAVORITE
-            + " integer, "*/
+            + " text not null, "
+            + DIRECTION_IS_FAVORITE
+            + " boolean not null "
             + ");";
 
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
@@ -36,7 +36,7 @@ public class HistoryTable {
     private static void populate(SQLiteDatabase sqLiteDatabase)
     {
 
-         sqLiteDatabase.execSQL("insert into history (textIn, textOut, translateDirection) values ("
+      /*   sqLiteDatabase.execSQL("insert into history (textIn, textOut, translateDirection) values ("
                 +"'привет',"
                 +"'Hello',"
                 +"'rus-eng'"
@@ -58,7 +58,7 @@ public class HistoryTable {
                 +"'номер',"
                 +"'number',"
                 +"'rus-eng'"
-                +")");
+                +")");*/
 
 
     }

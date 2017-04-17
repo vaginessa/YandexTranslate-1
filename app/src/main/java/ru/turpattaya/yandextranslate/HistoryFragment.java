@@ -4,6 +4,7 @@ import android.content.*;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,30 @@ public class HistoryFragment extends Fragment {
 
     public HistoryFragment() {
     }
+
+    // Активность, на которой будет размещен фрагмент, должна имплментить
+    // этот интерфейс, чтобы фрагмент мог передавать ей данные
+    public interface HistoryFragmentHost {
+        public void historySelected(int historyId, String historyTextIn, String historyTextOut, String historyTranslateDirection);
+    }
+
+    // Метод для получения курсора
+    private Cursor getHistoryCursor() {
+
+        ContentResolver resolver = getContext().getContentResolver();
+        return resolver.query(
+                MyContentProvider.CONTENT_URI,
+                null,
+                null,
+                null,
+                null);
+    }
+
+    private void updateCursorInAdapter() {
+        Cursor cursor = getHistoryCursor();
+        adapter.swapCursor(cursor);
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -43,24 +68,21 @@ public class HistoryFragment extends Fragment {
 
         return rowView;
     }
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+       /* helper = new MySQLiteHelper(context);*/
+        adapter = new MyCursorAdapter(context, null);
+        /*listHistory.setAdapter(adapter);*/
+        /*setListAdapter(adapter);*/
+        updateCursorInAdapter();
+        Log.d("happy", "ArticlesListFragment onAttach HistoryFragment onAtach");
 
-
-    // Активность, на которой будет размещен фрагмент, должна имплментить
-    // этот интерфейс, чтобы фрагмент мог передавать ей данные
-    public interface HistoryFragmentHost {
-        public void historySelected(int historyId, String historyTextIn, String historyTextOut, String historyTranslateDirection);
-    }
-
-    // Метод для получения курсора
-    private Cursor getHistoryCursor() {
-
-        ContentResolver resolver = getContext().getContentResolver();
-        return resolver.query(
-                MyContentProvider.CONTENT_URI,
-                null,
-                null,
-                null,
-                null);
+        if (context instanceof HistoryFragmentHost)
+            host = (HistoryFragmentHost) context;
+        else
+            throw new RuntimeException(context.toString()
+                    + " must implement HistoryFragmentHost (ArticleListFragmentHost!)");
     }
 
     // Метод жизненного цикла фрагмента
@@ -87,10 +109,7 @@ public class HistoryFragment extends Fragment {
     // Получем новый курсор.
     // Заменяем курсор в адаптере.
 
-    private void updateCursorInAdapter() {
-        Cursor cursor = getHistoryCursor();
-        adapter.swapCursor(cursor);
-    }
+
 
     // Метод жизненного цикла фрагмента.
     // Присваиваем листу нулевой адаптер
@@ -110,34 +129,3 @@ public class HistoryFragment extends Fragment {
         Log.d("happy", "ArticlesListFragment onDetach");
     }*/
 }
-
-
-//досмотреть Андроид 2 часть 69 последние 8 минут
-
-// Получение ссылки на ListView для регистрации щелчка
-        /*listHistory.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                               // Реакция на щелчок на статью в списке
-                                               // Вызываем интерфейсный метод в активности
-                                               @Override
-                                               public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                                   if (host != null) {
-                                                       Cursor cursor = adapter.getCursor();
-                                                       // Cursor cursor = getArticlesCursor();
-                                                       cursor.moveToPosition(i);
-                                                       float articleRating = cursor.getFloat(
-                                                               cursor.getColumnIndex(ArticlesTable.COLUMN_ARTICLE_RATING)
-                                                       );
-                                                       int articleId = cursor.getInt(
-                                                               cursor.getColumnIndex(ArticlesTable.COLUMN_ARTICLE_ID)
-                                                       );
-                                                       String articleURL = cursor.getString(
-                                                               cursor.getColumnIndex(ArticlesTable.COLUMN_ARTICLE_URL)
-                                                       );
-                                                       if (host != null)
-                                                           host.historySelected(articleId, articleURL, articleRating);
-                                                   }
-
-                                                   return rowView;
-                                               }
-
-                                           });*/

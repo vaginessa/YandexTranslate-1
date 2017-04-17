@@ -1,5 +1,6 @@
 package ru.turpattaya.yandextranslate;
 
+import android.content.Intent;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 
@@ -9,6 +10,9 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -16,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class HistoryAndFavoriteActivity extends AppCompatActivity {
+public class HistoryAndFavoriteActivity extends AppCompatActivity implements HistoryFragment.HistoryFragmentHost {
 
 
     private TabLayout tabLayout;
@@ -49,6 +53,11 @@ public class HistoryAndFavoriteActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
     }
 
+    @Override
+    public void historySelected(int historyId, String historyTextIn, String historyTextOut, String historyTranslateDirection) {
+
+    }
+
     private static class ViewPagerAdapter extends FragmentPagerAdapter {
 
         private final List<Fragment> fragmentList = new ArrayList<>(); //контейнер для фрагментов
@@ -77,5 +86,33 @@ public class HistoryAndFavoriteActivity extends AppCompatActivity {
             fragmentList.add(fragment);
             titleList.add(title);
         }
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_history_and_favorite, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.menu_main_translate:
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+                break;
+
+            case R.id.menu_main_favorite:
+                Intent intentFavorite = new Intent(this, HistoryAndFavoriteActivity.class);
+                startActivity(intentFavorite);
+                break;
+            case R.id.menu_main_settings:
+                break;
+            case R.id.menu_delete:
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }
