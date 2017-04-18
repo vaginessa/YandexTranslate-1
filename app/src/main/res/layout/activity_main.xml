@@ -66,11 +66,35 @@
         android:layout_below="@+id/card_view"/>
 
     <TextView
-        android:id="@+id/main_text_dictionary"
+        android:id="@+id/main_text_dict_translate_result"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:layout_below="@+id/main_text_out"/>
+
+    <TextView
+        android:id="@+id/main_text_dict_transcription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="транскрипция"
+        android:layout_below="@+id/main_text_out"
+        android:layout_margin="10dp"
+        android:layout_toEndOf="@+id/main_text_dict_translate_result"/>
+
+    <TextView
+        android:id="@+id/main_text_dict_pos_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="часть речи"
+        android:layout_margin="10dp"
+        android:layout_below="@+id/main_text_dict_translate_result"/>
+
+    <TextView
+        android:id="@+id/main_text_dict_tr_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:layout_below="@+id/main_text_dict_pos_result"/>
 
 
     <include layout="@layout/footer"

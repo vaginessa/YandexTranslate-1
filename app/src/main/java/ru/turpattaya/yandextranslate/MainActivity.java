@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import java.util.Timer;
 
 import retrofit2.Call;
@@ -24,7 +25,8 @@ import ru.turpattaya.yandextranslate.JsonDictionary.JsonDictionaryResult;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView inLanguageToolbar, outLanguageToolbar, tvOut, dictionaryResult;
+    private TextView inLanguageToolbar, outLanguageToolbar, tvOut;
+    private TextView dictTranslateResult, dictPosResult, dictTranscriptionResult, dictTrResult;
     private EditText etIn;
 
     private ImageView clearEtMain, footerTranslateImage, footerFavoriteImage, footerSettingsImage;
@@ -65,7 +67,10 @@ public class MainActivity extends AppCompatActivity {
         footerTranslateImage = (ImageView) findViewById(R.id.footer_image_translate);
         footerFavoriteImage = (ImageView) findViewById(R.id.footer_image_favorite);
         footerSettingsImage = (ImageView) findViewById(R.id.footer_image_settings);
-        dictionaryResult = (TextView) findViewById(R.id.main_text_dictionary);
+        dictTranslateResult = (TextView) findViewById(R.id.main_text_dict_translate_result);
+        dictPosResult = (TextView) findViewById(R.id.main_text_dict_pos_result);
+        dictTranscriptionResult = (TextView) findViewById(R.id.main_text_dict_transcription);
+        dictTrResult = (TextView) findViewById(R.id.main_text_dict_tr_result);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         inLanguageToolbarPref = preferences.getString("IN_LANG_TOOLBAR_PREF", null); //если что-то есть в preference , то мы это забираем
@@ -135,14 +140,17 @@ public class MainActivity extends AppCompatActivity {
         etIn.addTextChangedListener(new TextWatcher() {
             final Handler handler = new android.os.Handler();
             Runnable runnable;
+
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 handler.removeCallbacks(runnable);
             }
-            private Timer timer=new Timer();
+
+            private Timer timer = new Timer();
             private final long DELAY = 1000; // milliseconds
 
             @Override
@@ -150,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
                 runnable = new Runnable() {
                     @Override
                     public void run() {
-                            loadTranslate();
+                        loadTranslate();
                         loadDictionary();
                     }
                 };
@@ -193,15 +201,66 @@ public class MainActivity extends AppCompatActivity {
         textForTranslate = etIn.getText().toString();
         if (!textForTranslate.equals("")) {
 
-            api.dictionary(langCodePref,textForTranslate, new Callback<JsonDictionaryResult>() {
+            api.dictionary(langCodePref, textForTranslate, new Callback<JsonDictionaryResult>() {
                 @Override
                 public void onResponse(Call<JsonDictionaryResult> call, Response<JsonDictionaryResult> response) {
                     Log.d("Valo", "onResponse");
                     if (response != null) {
+                        //text = Text of the entry, translation, or synonym (mandatory)
+                        if (response.body().getDef().get(0).getText() != null) {
+                            dictTranslateResult.setText(response.body().getDef().get(0).getText());
+                        }
+                        //Ts = transcription
+                        if (response.body().getDef().get(0).getTs() != null) {
+                            dictTranscriptionResult.setText("[" + response.body().getDef().get(0).getTs() + "]");
+                        }
 
-                        dictionaryResult.setText(response.body().getDef().toString());
-                         Log.d("happy", response.body().getDef().toString());
-                            /*saveRequestInDataBase();*/
+                        for (int i = 0; i < response.body().getDef().size(); i++) {
+                            Log.d("Valo", "i=" + i);
+
+                            //pos = Part of speech (may be omitted).
+                            if (response.body().getDef().get(i).getPos() != null) {
+                                dictPosResult.setText(response.body().getDef().get(i).getPos());
+                            }
+
+                            //tr = Array of translations.  С этим не пояйму что делать
+                            if (response.body().getDef().get(i).getTr() != null) {
+                                for (int j = 0; j < response.body().getDef().get(i).getTr().size(); j++) {
+                                    dictTrResult.setText(response.body().getDef().get(i).getTr().get(j).getText());
+
+                                    //затем синонимы
+                                    for (int k = 0; k < response.body().getDef().get(i).getTr().get(j).getSyn().size(); k++) {
+                                      /*  @SerializedName("text")
+                                        @Expose
+                                        private String text;
+                                        @SerializedName("pos")
+                                        @Expose
+                                        private String pos;
+                                        @SerializedName("gen")
+                                        @Expose
+                                        private String gen;*/
+                                    }
+                                    //затем значения
+                                    for (int l = 0; l < response.body().getDef().get(i).getTr().get(j).getSyn().size(); l++) {
+                                       /* public class Mean {
+                                            @SerializedName("text")
+                                            @Expose
+                                            private String text;
+                                            */
+                                    }
+                                    //примеры
+                                    for (int m = 0; m < response.body().getDef().get(i).getTr().get(j).getSyn().size(); m++) {
+                                       /* public class Ex {
+                                            @SerializedName("text")
+                                            @Expose
+                                            private String text;
+                                            @SerializedName("tr")
+                                            @Expose
+                                            private List<Tr_> tr = null;*/
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -212,36 +271,38 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("Valo", "onFailure " + t.getMessage());
                 }
             });
-        } else {
+        } else
+
+        {
             tvOut.setText("");
         }
-    }
 
+    }
 
 
     private void loadTranslate() {
         API api = new API();
         textForTranslate = etIn.getText().toString();
-            if (!textForTranslate.equals("")) {
+        if (!textForTranslate.equals("")) {
 
-                api.translate(textForTranslate, langCodePref, new Callback<JsonTranslate>() {
-                    @Override
-                    public void onResponse(Call<JsonTranslate> call, Response<JsonTranslate> response) {
-                        Log.d("Valo", "onResponse");
-                        if (response != null) {
+            api.translate(textForTranslate, langCodePref, new Callback<JsonTranslate>() {
+                @Override
+                public void onResponse(Call<JsonTranslate> call, Response<JsonTranslate> response) {
+                    Log.d("Valo", "onResponse");
+                    if (response != null) {
                    /* Log.d("happy", response.body().getText().get(0));*/
-                            tvOut.setText(response.body().getText().get(0));
+                        tvOut.setText(response.body().getText().get(0));
                             /*saveRequestInDataBase();*/
-                        }
                     }
+                }
 
 
-                    @Override
-                    public void onFailure(Call<JsonTranslate> call, Throwable t) {
-                        Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
-                        Log.d("Valo", "onFailure " + t.getMessage());
-                    }
-                });
+                @Override
+                public void onFailure(Call<JsonTranslate> call, Throwable t) {
+                    Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+                    Log.d("Valo", "onFailure " + t.getMessage());
+                }
+            });
         } else {
             tvOut.setText("");
         }
@@ -284,6 +345,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return langCodePref;
     }
+
     private void saveDateToSharedPreference() {
         String putSharedInLangToolbar = inLanguageToolbar.getText().toString();
         SharedPreferences.Editor editorinLanguageToolbarPref = preferences.edit().putString(IN_LANG_TOOLBAR_PREF, putSharedInLangToolbar);
