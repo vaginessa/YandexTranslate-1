@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.media.Image;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -36,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText etIn;
     private TextView tvOut;
+
+    private ImageView clearEtMain;
 
     String textForTranslate;
 
@@ -127,6 +130,10 @@ public class MainActivity extends AppCompatActivity {
                 outLanguageToolbar.setText(getOutLang);
                 getPairLangsToRequest();
                 saveDateToSharedPreference();
+                if (tvOut != null) {
+                    String changeWord = tvOut.getText().toString();
+                    etIn.setText(changeWord);
+                }
                 loadTranslate();
 
             }
@@ -154,6 +161,13 @@ public class MainActivity extends AppCompatActivity {
                     }
                 };
                 handler.postDelayed(runnable, 500);
+            }
+        });
+        clearEtMain = (ImageView) findViewById(R.id.main_image_clear);
+        clearEtMain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                etIn.setText("");
             }
         });
     }
