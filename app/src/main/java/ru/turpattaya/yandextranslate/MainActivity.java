@@ -1,10 +1,7 @@
 package ru.turpattaya.yandextranslate;
 
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
-import android.media.Image;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -12,27 +9,22 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.method.KeyListener;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.HashMap;
 import java.util.Timer;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import ru.turpattaya.yandextranslate.JsonDictionary.JsonDictionaryResult;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView inLanguageToolbar, outLanguageToolbar, tvOut;
+    private TextView inLanguageToolbar, outLanguageToolbar, tvOut, dictionaryResult;
     private EditText etIn;
 
     private ImageView clearEtMain, footerTranslateImage, footerFavoriteImage, footerSettingsImage;
@@ -73,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
         footerTranslateImage = (ImageView) findViewById(R.id.footer_image_translate);
         footerFavoriteImage = (ImageView) findViewById(R.id.footer_image_favorite);
         footerSettingsImage = (ImageView) findViewById(R.id.footer_image_settings);
+        dictionaryResult = (TextView) findViewById(R.id.main_text_dictionary);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         inLanguageToolbarPref = preferences.getString("IN_LANG_TOOLBAR_PREF", null); //если что-то есть в preference , то мы это забираем
@@ -158,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                             loadTranslate();
+                        loadDictionary();
                     }
                 };
                 handler.postDelayed(runnable, 500);
@@ -194,22 +188,36 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void saveDateToSharedPreference() {
-        String putSharedInLangToolbar = inLanguageToolbar.getText().toString();
-        SharedPreferences.Editor editorinLanguageToolbarPref = preferences.edit().putString(IN_LANG_TOOLBAR_PREF, putSharedInLangToolbar);
-        editorinLanguageToolbarPref.apply();
-        String putSharedOutLangToolbar = outLanguageToolbar.getText().toString();
-        SharedPreferences.Editor outLanguageToolbar = preferences.edit().putString(OUT_LANG_TOOLBAR_PREF, putSharedOutLangToolbar);
-        outLanguageToolbar.apply();
-        SharedPreferences.Editor editorlangCodePref = preferences.edit().putString(LANG_CODE_PREF, langCodePref);
-        editorlangCodePref.apply();
-        SharedPreferences.Editor inLangKeyPref = preferences.edit().putString(IN_LANG_KEY, inLangKey);
-        inLangKeyPref.apply();
-        SharedPreferences.Editor outLangKeyPref = preferences.edit().putString(OUT_LANG_KEY, outLangKey);
-        outLangKeyPref.apply();
-        /*Log.d("Valo", "shared null after put, IN_LANG_TOOLBAR_PREF= "+ IN_LANG_TOOLBAR_PREF + inLanguageToolbarPref+ " " +
-                outLanguageToolbarPref+ " " +langCodePref+ " " + inLangKey+ " " + outLangKey);*/
+    private void loadDictionary() {
+        API api = new API();
+        textForTranslate = etIn.getText().toString();
+        if (!textForTranslate.equals("")) {
+
+            api.dictionary(langCodePref,textForTranslate, new Callback<JsonDictionaryResult>() {
+                @Override
+                public void onResponse(Call<JsonDictionaryResult> call, Response<JsonDictionaryResult> response) {
+                    Log.d("Valo", "onResponse");
+                    if (response != null) {
+
+                        dictionaryResult.setText(response.body().getDef().toString());
+                         Log.d("happy", response.body().getDef().toString());
+                            /*saveRequestInDataBase();*/
+                    }
+                }
+
+
+                @Override
+                public void onFailure(Call<JsonDictionaryResult> call, Throwable t) {
+                    Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+                    Log.d("Valo", "onFailure " + t.getMessage());
+                }
+            });
+        } else {
+            tvOut.setText("");
+        }
     }
+
+
 
     private void loadTranslate() {
         API api = new API();
@@ -275,6 +283,22 @@ public class MainActivity extends AppCompatActivity {
             editorLangCodePref.apply();
         }
         return langCodePref;
+    }
+    private void saveDateToSharedPreference() {
+        String putSharedInLangToolbar = inLanguageToolbar.getText().toString();
+        SharedPreferences.Editor editorinLanguageToolbarPref = preferences.edit().putString(IN_LANG_TOOLBAR_PREF, putSharedInLangToolbar);
+        editorinLanguageToolbarPref.apply();
+        String putSharedOutLangToolbar = outLanguageToolbar.getText().toString();
+        SharedPreferences.Editor outLanguageToolbar = preferences.edit().putString(OUT_LANG_TOOLBAR_PREF, putSharedOutLangToolbar);
+        outLanguageToolbar.apply();
+        SharedPreferences.Editor editorlangCodePref = preferences.edit().putString(LANG_CODE_PREF, langCodePref);
+        editorlangCodePref.apply();
+        SharedPreferences.Editor inLangKeyPref = preferences.edit().putString(IN_LANG_KEY, inLangKey);
+        inLangKeyPref.apply();
+        SharedPreferences.Editor outLangKeyPref = preferences.edit().putString(OUT_LANG_KEY, outLangKey);
+        outLangKeyPref.apply();
+        /*Log.d("Valo", "shared null after put, IN_LANG_TOOLBAR_PREF= "+ IN_LANG_TOOLBAR_PREF + inLanguageToolbarPref+ " " +
+                outLanguageToolbarPref+ " " +langCodePref+ " " + inLangKey+ " " + outLangKey);*/
     }
 }
 

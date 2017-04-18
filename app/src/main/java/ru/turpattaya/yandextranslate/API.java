@@ -3,12 +3,11 @@ package ru.turpattaya.yandextranslate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import ru.turpattaya.yandextranslate.JsonDictionary.JsonDictionaryResult;
 
 import static ru.turpattaya.yandextranslate.ApiKey.KEY_API_YANDEX;
 import static ru.turpattaya.yandextranslate.ApiKey.KEY_DICTIONARY_YANDEX;
@@ -44,7 +43,7 @@ public class API {
 
 
     /*https://dictionary.yandex.net/api/v1/dicservice.json/lookup?key=...&lang=en-ru&text=time*/
-    void dictionary(String key, String translateDirection, String text, Callback<Object> callback) {
+    void dictionary(String translateDirection, String text, Callback<JsonDictionaryResult> callback) {
           /* HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
 // set your desired log level
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -63,7 +62,7 @@ public class API {
                 .build();
         ServiceDictionary service = retrofit.create(ServiceDictionary.class);
 
-        Call<Object> call = service.getDictioanry(KEY_DICTIONARY_YANDEX, translateDirection, text);
+        Call<JsonDictionaryResult> call = service.getDictioanry(KEY_DICTIONARY_YANDEX, translateDirection, text);
         call.enqueue(callback);
     }
 }
