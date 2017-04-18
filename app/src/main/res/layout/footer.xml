@@ -1,0 +1,32 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="30dp"
+    android:orientation="horizontal"
+    android:id="@+id/footer"
+    android:layout_gravity="bottom"
+    android:layout_alignParentBottom="true"
+    android:fitsSystemWindows="true"
+    android:isScrollContainer="false">
+
+    <ImageView
+        android:id="@+id/footer_image_translate"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:src="@drawable/ic_menu_translate_black_24dp"/>
+
+    <ImageView
+        android:id="@+id/footer_image_favorite"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:src="@drawable/ic_not_favorite_24dp"/>
+
+    <ImageView
+        android:id="@+id/footer_image_settings"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:src="@drawable/ic_menu_settings_black_24dp"/>
+
+</LinearLayout>

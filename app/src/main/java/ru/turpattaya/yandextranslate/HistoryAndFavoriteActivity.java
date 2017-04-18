@@ -13,8 +13,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,16 +28,44 @@ public class HistoryAndFavoriteActivity extends AppCompatActivity implements His
     private TabLayout tabLayout;
     private ViewPager viewPager;
 
+    private ImageView footerTranslateImage, footerFavoriteImage, footerSettingsImage;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history_and_favorite);
+        footerTranslateImage = (ImageView) findViewById(R.id.footer_image_translate);
+        footerFavoriteImage = (ImageView) findViewById(R.id.footer_image_favorite);
+        footerSettingsImage = (ImageView) findViewById(R.id.footer_image_settings);
 
         if (android.os.Build.VERSION.SDK_INT >= 21) {
             Window window = this.getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.setStatusBarColor(this.getResources().getColor(R.color.colorPrimaryDark));
+
+            footerTranslateImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(HistoryAndFavoriteActivity.this, MainActivity.class);
+                    startActivity(intent);
+                }
+            });
+            footerFavoriteImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(HistoryAndFavoriteActivity.this, HistoryAndFavoriteActivity.class);
+                    startActivity(intent);
+                }
+            });
+            footerSettingsImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(HistoryAndFavoriteActivity.this, SettingsActivity.class);
+                    startActivity(intent);
+                }
+            });
         }
 
         tabLayout = (TabLayout) findViewById (R.id.tabs);
@@ -51,6 +81,7 @@ public class HistoryAndFavoriteActivity extends AppCompatActivity implements His
         adapter.addFragment(new FavoriteFragment(), "Избранное");
 
         viewPager.setAdapter(adapter);
+
     }
 
     @Override
@@ -98,18 +129,8 @@ public class HistoryAndFavoriteActivity extends AppCompatActivity implements His
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
-            case R.id.menu_main_translate:
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-                break;
-
-            case R.id.menu_main_favorite:
-                Intent intentFavorite = new Intent(this, HistoryAndFavoriteActivity.class);
-                startActivity(intentFavorite);
-                break;
-            case R.id.menu_main_settings:
-                break;
             case R.id.menu_delete:
+//TODO дописать после добавления бд
                 break;
         }
 

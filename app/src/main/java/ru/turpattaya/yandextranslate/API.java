@@ -42,7 +42,34 @@ public class API {
         call.enqueue(callback);
     }
 
-  /*  void getLangs(Callback<Object> callback) {
+
+    /*https://dictionary.yandex.net/api/v1/dicservice.json/lookup?key=...&lang=en-ru&text=time*/
+    void dictionary(String key, String translateDirection, String text, Callback<Object> callback) {
+          /* HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+// set your desired log level
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+// add your other interceptors …
+// add logging as last interceptor
+        httpClient.addInterceptor(logging);  // <-- this is the important line!*/
+
+        Gson gson = new GsonBuilder().create();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://dictionary.yandex.net/")
+                .addConverterFactory(GsonConverterFactory.create(gson))
+/*
+                  .client(httpClient.build())
+*/
+                .build();
+        ServiceDictionary service = retrofit.create(ServiceDictionary.class);
+
+        Call<Object> call = service.getDictioanry(KEY_DICTIONARY_YANDEX, translateDirection, text);
+        call.enqueue(callback);
+    }
+}
+
+
+ /*  void getLangs(Callback<Object> callback) {
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
 // set your desired log level
@@ -63,4 +90,3 @@ public class API {
         Call<Object> call = service.getLangs(KEY_DICTIONARY_YANDEX);
         call.enqueue(callback);
     }*/
-}

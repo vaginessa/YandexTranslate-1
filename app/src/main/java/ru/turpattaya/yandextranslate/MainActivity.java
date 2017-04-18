@@ -32,13 +32,10 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView inLanguageToolbar;
-    private TextView outLanguageToolbar;
-
+    private TextView inLanguageToolbar, outLanguageToolbar, tvOut;
     private EditText etIn;
-    private TextView tvOut;
 
-    private ImageView clearEtMain;
+    private ImageView clearEtMain, footerTranslateImage, footerFavoriteImage, footerSettingsImage;
 
     String textForTranslate;
 
@@ -73,6 +70,9 @@ public class MainActivity extends AppCompatActivity {
         inLanguageToolbar = (TextView) findViewById(R.id.main_toolbar_translate_from);
         outLanguageToolbar = (TextView) findViewById(R.id.main_toolbar_translate_to);
         ImageView translateDirectionToolbar = (ImageView) findViewById(R.id.main_toolbar_translate_direction);
+        footerTranslateImage = (ImageView) findViewById(R.id.footer_image_translate);
+        footerFavoriteImage = (ImageView) findViewById(R.id.footer_image_favorite);
+        footerSettingsImage = (ImageView) findViewById(R.id.footer_image_settings);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         inLanguageToolbarPref = preferences.getString("IN_LANG_TOOLBAR_PREF", null); //если что-то есть в preference , то мы это забираем
@@ -170,6 +170,28 @@ public class MainActivity extends AppCompatActivity {
                 etIn.setText("");
             }
         });
+
+        footerTranslateImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
+        footerFavoriteImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, HistoryAndFavoriteActivity.class);
+                startActivity(intent);
+            }
+        });
+        footerSettingsImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void saveDateToSharedPreference() {
@@ -215,27 +237,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             tvOut.setText("");
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_main_translate:
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-                break;
-
-            case R.id.menu_main_favorite:
-                Intent intentFavorite = new Intent(this, HistoryAndFavoriteActivity.class);
-                startActivity(intentFavorite);
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     public void getInLanguageFromDialog(String languageIn, String key) {
