@@ -4,15 +4,12 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class HistoryTable {
 
-
-
     public static final String TABLE_HISTORY = "history";
     public static final String COLUMN_HISTORY_ID = "_id";
     public static final String COLUMN_HISTORY_TEXTIN = "textIn";
     public static final String COLUMN_HISTORY_TEXTOUT = "textOut";
     public static final String COLUMN_HISTORY_TRANSLATE_DIRECTION = "translateDirection";
-    public static final Boolean DIRECTION_IS_FAVORITE = false;
-
+    public static final String COLUMN_DIRECTION_IS_FAVORITE = "false";
 
     private static final String HISTORY_CREATE = "create table "
             + TABLE_HISTORY + "("
@@ -24,43 +21,12 @@ public class HistoryTable {
             + " text not null, "
             + COLUMN_HISTORY_TRANSLATE_DIRECTION
             + " text not null, "
-            + DIRECTION_IS_FAVORITE
+            + COLUMN_DIRECTION_IS_FAVORITE
             + " boolean not null "
             + ");";
 
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL(HISTORY_CREATE);
-        populate(sqLiteDatabase);
-    }
-
-    private static void populate(SQLiteDatabase sqLiteDatabase)
-    {
-
-      /*   sqLiteDatabase.execSQL("insert into history (textIn, textOut, translateDirection) values ("
-                +"'привет',"
-                +"'Hello',"
-                +"'rus-eng'"
-                +")");
-
-        sqLiteDatabase.execSQL("insert into history (textIn, textOut, translateDirection) values ("
-                +"'До свидания',"
-                +"'Good buy',"
-                +"'rus-eng'"
-                +")");
-
-        sqLiteDatabase.execSQL("insert into history (textIn, textOut, translateDirection) values ("
-                +"'Computer',"
-                +"'Компьютер',"
-                +"'eng-rus'"
-                +")");
-
-        sqLiteDatabase.execSQL("insert into history (textIn, textOut, translateDirection) values ("
-                +"'номер',"
-                +"'number',"
-                +"'rus-eng'"
-                +")");*/
-
-
     }
 
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {

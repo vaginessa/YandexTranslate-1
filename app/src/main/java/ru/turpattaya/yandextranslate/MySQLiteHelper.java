@@ -1,8 +1,9 @@
 package ru.turpattaya.yandextranslate;
 
-import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
+
+        import android.content.Context;
+        import android.database.sqlite.SQLiteDatabase;
+        import android.database.sqlite.SQLiteOpenHelper;
 
 public class MySQLiteHelper extends SQLiteOpenHelper {
 

@@ -68,10 +68,10 @@ public class HistoryFragment extends Fragment {
 
         return rowView;
     }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-       /* helper = new MySQLiteHelper(context);*/
         adapter = new MyCursorAdapter(context, null);
         /*listHistory.setAdapter(adapter);*/
         /*setListAdapter(adapter);*/
@@ -84,6 +84,23 @@ public class HistoryFragment extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement HistoryFragmentHost (ArticleListFragmentHost!)");
     }
+
+    // Метод жизненного цикла фрагмента.
+    // Присваиваем листу нулевой адаптер
+    // Заменяем в адаптере курсор на null
+    // зануляем адаптер
+    // обнуляем ссылку на активность,
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        adapter.swapCursor(null);
+        adapter = null;
+        host = null;
+        Log.d("happy", "HistoryFragment onDetach");
+    }
+}
+
+
 
     // Метод жизненного цикла фрагмента
     // Нужен чтобы получить ссылку на активность,
@@ -128,4 +145,3 @@ public class HistoryFragment extends Fragment {
         host = null;
         Log.d("happy", "ArticlesListFragment onDetach");
     }*/
-}

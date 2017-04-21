@@ -1,9 +1,14 @@
 package ru.turpattaya.yandextranslate;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -31,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView clearEtMain, footerTranslateImage, footerFavoriteImage, footerSettingsImage;
 
-    String textForTranslate;
+    String textForTranslate, inLanguageToolbarPref, outLanguageToolbarPref, langCodePref, inLangKey, outLangKey;
 
     SharedPreferences preferences;
     public static final String IN_LANG_TOOLBAR_PREF = "IN_LANG_TOOLBAR_PREF";
@@ -40,12 +45,11 @@ public class MainActivity extends AppCompatActivity {
     public static final String IN_LANG_KEY = "IN_LANG_KEY";
     public static final String OUT_LANG_KEY = "OUT_LANG_KEY";
 
-    String inLanguageToolbarPref;
-    String outLanguageToolbarPref;
-    String langCodePref;
-    String inLangKey;
-    String outLangKey;
+    SQLiteDatabase db;
+    MyCursorAdapter adapter;
 
+    public MainActivity() {
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         dictTranslateResult = (TextView) findViewById(R.id.main_text_dict_translate_result);
         dictPosResult = (TextView) findViewById(R.id.main_text_dict_pos_result);
         dictTranscriptionResult = (TextView) findViewById(R.id.main_text_dict_transcription);
-        dictTrResult = (TextView) findViewById(R.id.main_text_dict_tr_result);
+        /*dictTrResult = (TextView) findViewById(R.id.main_text_dict_tr_result);*/
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         inLanguageToolbarPref = preferences.getString("IN_LANG_TOOLBAR_PREF", null); //если что-то есть в preference , то мы это забираем
@@ -150,19 +154,24 @@ public class MainActivity extends AppCompatActivity {
                 handler.removeCallbacks(runnable);
             }
 
-            private Timer timer = new Timer();
-            private final long DELAY = 1000; // milliseconds
-
             @Override
             public void afterTextChanged(Editable s) {
                 runnable = new Runnable() {
                     @Override
                     public void run() {
                         loadTranslate();
-                        loadDictionary();
+                        String text = etIn.getText().toString();
+                        String[] words = text.split("\\s+");
+                        if (words.length < 2 && words.length >0) {
+                            loadDictionary();
+                        } else {
+                            dictTranslateResult.setText("");
+                            dictPosResult.setText("");
+                            dictTranscriptionResult.setText("");
+                        }
                     }
                 };
-                handler.postDelayed(runnable, 500);
+                handler.postDelayed(runnable, 2000);
             }
         });
         clearEtMain = (ImageView) findViewById(R.id.main_image_clear);
@@ -207,6 +216,9 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("Valo", "onResponse");
                     if (response != null) {
                         //text = Text of the entry, translation, or synonym (mandatory)
+                        for (int i = 0; i <response.body().getDef().size() ; i++) { //нужно для текста для вывода > одного слова
+
+
                         if (response.body().getDef().get(0).getText() != null) {
                             dictTranslateResult.setText(response.body().getDef().get(0).getText());
                         }
@@ -215,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
                             dictTranscriptionResult.setText("[" + response.body().getDef().get(0).getTs() + "]");
                         }
 
-                        for (int i = 0; i < response.body().getDef().size(); i++) {
+
                             Log.d("Valo", "i=" + i);
 
                             //pos = Part of speech (may be omitted).
@@ -223,14 +235,14 @@ public class MainActivity extends AppCompatActivity {
                                 dictPosResult.setText(response.body().getDef().get(i).getPos());
                             }
 
-                            //tr = Array of translations.  С этим не пояйму что делать
-                            if (response.body().getDef().get(i).getTr() != null) {
+                            //tr = Array of translations.
+                            /*if (response.body().getDef().get(i).getTr() != null) {
                                 for (int j = 0; j < response.body().getDef().get(i).getTr().size(); j++) {
                                     dictTrResult.setText(response.body().getDef().get(i).getTr().get(j).getText());
 
                                     //затем синонимы
                                     for (int k = 0; k < response.body().getDef().get(i).getTr().get(j).getSyn().size(); k++) {
-                                      /*  @SerializedName("text")
+                                      *//*  @SerializedName("text")
                                         @Expose
                                         private String text;
                                         @SerializedName("pos")
@@ -238,32 +250,31 @@ public class MainActivity extends AppCompatActivity {
                                         private String pos;
                                         @SerializedName("gen")
                                         @Expose
-                                        private String gen;*/
+                                        private String gen;*//*
                                     }
                                     //затем значения
                                     for (int l = 0; l < response.body().getDef().get(i).getTr().get(j).getSyn().size(); l++) {
-                                       /* public class Mean {
+                                       *//* public class Mean {
                                             @SerializedName("text")
                                             @Expose
                                             private String text;
-                                            */
+                                            *//*
                                     }
                                     //примеры
                                     for (int m = 0; m < response.body().getDef().get(i).getTr().get(j).getSyn().size(); m++) {
-                                       /* public class Ex {
+                                       *//* public class Ex {
                                             @SerializedName("text")
                                             @Expose
                                             private String text;
                                             @SerializedName("tr")
                                             @Expose
-                                            private List<Tr_> tr = null;*/
+                                            private List<Tr_> tr = null;*//*
                                     }
                                 }
-                            }
+                            }*/
                         }
                     }
                 }
-
 
                 @Override
                 public void onFailure(Call<JsonDictionaryResult> call, Throwable t) {
@@ -271,12 +282,9 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("Valo", "onFailure " + t.getMessage());
                 }
             });
-        } else
-
-        {
+        } else {
             tvOut.setText("");
         }
-
     }
 
 
@@ -291,8 +299,10 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("Valo", "onResponse");
                     if (response != null) {
                    /* Log.d("happy", response.body().getText().get(0));*/
-                        tvOut.setText(response.body().getText().get(0));
-                            /*saveRequestInDataBase();*/
+                        String textOut = response.body().getText().get(0);
+                        tvOut.setText(textOut);
+                            addRec(textForTranslate, textOut, langCodePref, "false");
+
                     }
                 }
 
@@ -362,23 +372,26 @@ public class MainActivity extends AppCompatActivity {
         /*Log.d("Valo", "shared null after put, IN_LANG_TOOLBAR_PREF= "+ IN_LANG_TOOLBAR_PREF + inLanguageToolbarPref+ " " +
                 outLanguageToolbarPref+ " " +langCodePref+ " " + inLangKey+ " " + outLangKey);*/
     }
+
+
+
+    private void addRec(String textIn, String textOut, String translateDirection, String directionIsFavorite) {
+        MySQLiteHelper mDBHelper = new MySQLiteHelper(this);
+
+        db = mDBHelper.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(HistoryTable.COLUMN_HISTORY_TEXTIN, textIn);
+        cv.put(HistoryTable.COLUMN_HISTORY_TEXTOUT, textOut);
+        cv.put(HistoryTable.COLUMN_HISTORY_TRANSLATE_DIRECTION, translateDirection);
+        cv.put(HistoryTable.COLUMN_DIRECTION_IS_FAVORITE, directionIsFavorite);
+        db.insert(HistoryTable.TABLE_HISTORY, null, cv);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        db.close();
+    }
 }
 
-/*  private void saveRequestInDataBase() {
 
-        MySQLiteHelper helper = new MySQLiteHelper(this);
-        SQLiteDatabase db = helper.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        *//*values.put(HistoryTable.COLUMN_HISTORY_ID, id);*//*
-        values.put(HistoryTable.COLUMN_HISTORY_TEXTIN, etIn.getText().toString());
-        values.put(HistoryTable.COLUMN_HISTORY_TEXTOUT, tvOut.getText().toString());
-        values.put(HistoryTable.COLUMN_HISTORY_TRANSLATE_DIRECTION, langCode);
-
-// Insert the new row, returning the primary key value of the new row
-        long newRowId;
-        newRowId = db.insert(
-                HistoryTable.TABLE_HISTORY,
-                null,
-                values);
-    }*/
