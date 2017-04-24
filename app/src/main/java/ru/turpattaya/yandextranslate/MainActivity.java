@@ -36,11 +36,11 @@ import static ru.turpattaya.yandextranslate.ApiKey.KEY_SPEECHKIT_YANDEX;
 
 public class MainActivity extends AppCompatActivity implements VocalizerListener {
 
-    private TextView inLanguageToolbar, outLanguageToolbar, tvOut, textVocalizerStats;
+    private TextView inLanguageToolbar, outLanguageToolbar, tvOut;
     private TextView dictTranslateResult, dictPosResult, dictTranscriptionResult, dictTrResult;
     private EditText etIn;
 
-    private ImageView imageClearEtMain, imageMicrophoneMain, imageReproductionTextInMain,
+    private ImageView imageClearEtMain, imageMicrophoneMain, imageReproductionTextInMain, imageReproductionTextOutMain,
             footerTranslateImage, footerFavoriteImage, footerSettingsImage;
 
     public static final int REQUEST_CODE = 999;
@@ -185,6 +185,9 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
                 handler.postDelayed(runnable, 2000);
             }
         });
+
+        
+
         imageClearEtMain = (ImageView) findViewById(R.id.main_image_clear);
         imageClearEtMain.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -219,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
 
         imageMicrophoneMain = (ImageView) findViewById(R.id.main_microphone);
         imageReproductionTextInMain = (ImageView) findViewById(R.id.main_reproduction_text_in);
+        imageReproductionTextOutMain = (ImageView) findViewById(R.id.main_reproduction_text_out);
 
         imageMicrophoneMain.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -230,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
                 startActivityForResult(intent, REQUEST_CODE);
             }
         });
-        textVocalizerStats = (TextView) findViewById(R.id.main_vocalizer_stats);
+
         imageReproductionTextInMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -242,6 +246,27 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
                     vocalizer = Vocalizer.createVocalizer(Vocalizer.Language.RUSSIAN, textVocal, true, Vocalizer.Voice.ERMIL);
                     vocalizer.setListener(MainActivity.this);
                     vocalizer.start();
+                }
+            }
+        });
+
+        imageReproductionTextOutMain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String textOutVocal = tvOut.getText().toString();
+                if (TextUtils.isEmpty(textOutVocal)) {
+                    Toast.makeText(MainActivity.this, "Нечего воспроизводить!", Toast.LENGTH_SHORT).show();
+                } else {
+                    resetVocalizer();
+                    if (OUT_LANG_KEY.equals("ru")) {
+                        vocalizer = Vocalizer.createVocalizer(Vocalizer.Language.RUSSIAN, textOutVocal, true, Vocalizer.Voice.ERMIL);
+                        vocalizer.setListener(MainActivity.this);
+                        vocalizer.start();
+                    } else if (OUT_LANG_KEY.equals("en")) {
+                        vocalizer = Vocalizer.createVocalizer(Vocalizer.Language.ENGLISH, textOutVocal, true, Vocalizer.Voice.ERMIL);
+                        vocalizer.setListener(MainActivity.this);
+                        vocalizer.start();
+                    }
                 }
             }
         });
@@ -461,33 +486,29 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
         resetVocalizer();
     }
 
-    private void updateStateText(final String text) {
-        textVocalizerStats.setText(text);
-    }
-
     @Override
     public void onSynthesisBegin(Vocalizer vocalizer) {
-        updateStateText("Synthesis begin");
+        Toast.makeText(MainActivity.this, "Обрабатываем",  Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onSynthesisDone(Vocalizer vocalizer, Synthesis synthesis) {
-        updateStateText("Synthesis done");
+
     }
 
     @Override
     public void onPlayingBegin(Vocalizer vocalizer) {
-        updateStateText("Playing begin");
+        Toast.makeText(MainActivity.this, "Воспроизведение",  Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onPlayingDone(Vocalizer vocalizer) {
-        updateStateText("Playing done");
+        Toast.makeText(MainActivity.this, "Воспроизведение заверщено", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onVocalizerError(Vocalizer vocalizer, Error error) {
-        updateStateText("Error occurred " + error.getString());
+        Toast.makeText(MainActivity.this, "Error occurred " + error.getString(), Toast.LENGTH_SHORT).show();
         resetVocalizer();
     }
 }

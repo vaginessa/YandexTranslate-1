@@ -9,7 +9,7 @@
     <android.support.v7.widget.CardView
         android:id="@+id/card_view"
         android:layout_width="fill_parent"
-        android:layout_height="150dp"
+        android:layout_height="170dp"
         android:layout_margin="10dp"
         android:layout_gravity="center"
 
@@ -29,6 +29,7 @@
                 android:inputType="textMultiLine"
                 android:scrollbars="vertical"
                 android:focusable="true"
+                android:imeOptions="actionGo"
                 android:hint="Введите текст"
                 android:focusableInTouchMode="true"
                 android:layout_toStartOf="@+id/main_microphone"
@@ -40,23 +41,23 @@
                 android:id="@+id/main_image_clear"
                 android:src="@drawable/ic_clear_black_24dp"
                 android:layout_alignParentBottom="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_width="30dp"
+                android:layout_height="30dp"/>
 
             <ImageView
                 android:id="@+id/main_microphone"
                 android:src="@drawable/ic_keyboard_voice_black_24dp"
                 android:layout_alignParentRight="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
 
             <ImageView
                 android:id="@+id/main_reproduction_text_in"
                 android:src="@drawable/ic_volume_up_black_24dp"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
 
         </RelativeLayout>
     </android.support.v7.widget.CardView>
@@ -67,6 +68,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/card_view"/>
+
+    <ImageView
+        android:id="@+id/main_reproduction_text_out"
+        android:src="@drawable/ic_volume_up_black_24dp"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/card_view"
+        android:layout_marginEnd="20dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp" />
 
     <TextView
         android:id="@+id/main_text_dict_translate_result"
@@ -89,17 +99,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:layout_below="@+id/main_text_dict_translate_result"/>
-
-    <TextView
-        android:id="@+id/main_vocalizer_stats"
-        android:gravity="bottom"
-        android:layout_centerInParent="true"
-        android:paddingBottom="100dp"
-
-
-        android:hint="affsdfsdfsdf"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent" />
 
 
     <include layout="@layout/footer"
