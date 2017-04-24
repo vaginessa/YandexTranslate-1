@@ -105,12 +105,34 @@ public class HistoryAndFavoriteActivity extends AppCompatActivity implements His
 
     }
 
+    ViewPager.OnPageChangeListener myOnPageChangeListener =
+            new ViewPager.OnPageChangeListener(){
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
+                }
+
+                @Override
+                public void onPageScrolled(int position,
+                                           float positionOffset, int positionOffsetPixels) {
+
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    //This method will be invoked when a new page becomes selected.
+
+                }};
+
+
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new HistoryFragment(), "История");
         adapter.addFragment(new FavoriteFragment(), "Избранное");
         viewPager.setAdapter(adapter);
+        viewPager.setOnPageChangeListener(myOnPageChangeListener);
     }
 
     @Override
@@ -120,13 +142,12 @@ public class HistoryAndFavoriteActivity extends AppCompatActivity implements His
 
 
 
-    private static class ViewPagerAdapter extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener,
-                                                                                    TabHost.OnTabChangeListener {
+     private static class ViewPagerAdapter extends FragmentPagerAdapter implements TabHost.OnTabChangeListener {
 
         TabHost mTabHost;
         ViewPager mViewPager;
 
-        private final List<Fragment> fragmentList = new ArrayList<>(); //контейнер для фрагментов
+         final List<Fragment> fragmentList = new ArrayList<>(); //контейнер для фрагментов
         private  final List<String> titleList = new ArrayList<>(); // контейнер для заголовков Tabs
 
         public ViewPagerAdapter(FragmentManager fm) {
@@ -155,22 +176,7 @@ public class HistoryAndFavoriteActivity extends AppCompatActivity implements His
             titleList.add(title);
         }
 
-        @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-        }
-
-        @Override
-        public void onPageSelected(int position) {
-            TabWidget widget = mTabHost.getTabWidget();
-            int oldFocusability = widget.getDescendantFocusability();
-            widget.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-            mTabHost.setCurrentTab(position);
-            widget.setDescendantFocusability(oldFocusability);
-            refreshPage(position);
-        }
-
-        private void refreshPage(int position) {
+         void refreshPage(int position) {
             Fragment fragment = getItem(position);
 
             switch (position) {
@@ -183,10 +189,6 @@ public class HistoryAndFavoriteActivity extends AppCompatActivity implements His
             }
         }
 
-        @Override
-        public void onPageScrollStateChanged(int state) {
-
-        }
 
         @Override
         public void onTabChanged(String tabId) {
