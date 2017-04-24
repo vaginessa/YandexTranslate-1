@@ -16,9 +16,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.TabHost;
+import android.widget.TabWidget;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,7 +120,11 @@ public class HistoryAndFavoriteActivity extends AppCompatActivity implements His
 
 
 
-    private static class ViewPagerAdapter extends FragmentPagerAdapter {
+    private static class ViewPagerAdapter extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener,
+                                                                                    TabHost.OnTabChangeListener {
+
+        TabHost mTabHost;
+        ViewPager mViewPager;
 
         private final List<Fragment> fragmentList = new ArrayList<>(); //контейнер для фрагментов
         private  final List<String> titleList = new ArrayList<>(); // контейнер для заголовков Tabs
@@ -141,12 +148,53 @@ public class HistoryAndFavoriteActivity extends AppCompatActivity implements His
             return titleList.get(position);
         }
 
+
+
         void addFragment(Fragment fragment, String title) {// метод, который в этот адаптер добавит fragment and title
             fragmentList.add(fragment);
             titleList.add(title);
         }
+
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+            TabWidget widget = mTabHost.getTabWidget();
+            int oldFocusability = widget.getDescendantFocusability();
+            widget.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+            mTabHost.setCurrentTab(position);
+            widget.setDescendantFocusability(oldFocusability);
+            refreshPage(position);
+        }
+
+        private void refreshPage(int position) {
+            Fragment fragment = getItem(position);
+
+            switch (position) {
+                case 0:
+                    ((HistoryFragment) fragment).refreshView();
+                    break;
+                case 1:
+                    ((FavoriteFragment) fragment).refreshView();
+                    break;
+            }
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+
+        }
+
+        @Override
+        public void onTabChanged(String tabId) {
+            int postion = mTabHost.getCurrentTab();
+            mViewPager.setCurrentItem(postion, true);
+        }
     }
-    @Override
+  /*  @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_history_and_favorite, menu);
@@ -163,5 +211,5 @@ public class HistoryAndFavoriteActivity extends AppCompatActivity implements His
         }
 
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 }

@@ -40,7 +40,7 @@ import static ru.turpattaya.yandextranslate.ApiKey.KEY_SPEECHKIT_YANDEX;
 
 public class MainActivity extends AppCompatActivity implements VocalizerListener {
 
-    private TextView inLanguageToolbar, outLanguageToolbar, tvOut;
+    private TextView inLanguageToolbar, outLanguageToolbar, tvOut, linkYandex;
     private TextView dictTranslateResult, dictPosResult, dictTranscriptionResult, dictTrResult;
     private EditText etIn;
 
@@ -74,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
             getSupportActionBar().setHomeButtonEnabled(false);
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
+        linkYandex = (TextView) findViewById(R.id.link_yandex);
+
 
         etIn = (EditText) findViewById(R.id.main_edit_text_in);
         tvOut = (TextView) findViewById(R.id.main_text_out);

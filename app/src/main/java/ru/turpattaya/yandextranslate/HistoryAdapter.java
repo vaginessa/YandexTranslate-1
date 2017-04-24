@@ -39,6 +39,12 @@ public class HistoryAdapter extends CursorAdapter {
         return row;
     }
 
+    Cursor updateDBCursor(MySQLiteHelper helper)
+    {
+        return helper.getReadableDatabase().query(
+                HistoryTable.TABLE_HISTORY, null, null, null, null, null, null );
+    }
+
     private void populateView(final ViewHolderItem holder, Cursor cursor, Context context) {
         holder.textInHistory.setText(cursor.getString(cursor.getColumnIndex(HistoryTable.COLUMN_HISTORY_TEXTIN)));
         holder.textOutHistory.setText(cursor.getString(cursor.getColumnIndex(HistoryTable.COLUMN_HISTORY_TEXTOUT)));
@@ -75,8 +81,8 @@ public class HistoryAdapter extends CursorAdapter {
                 helper.getWritableDatabase().update(HistoryTable.TABLE_HISTORY, values, HistoryTable.COLUMN_HISTORY_ID
                         +" = '"+ holderItem.id + "'", null);
 
-                Cursor cursor = helper.getReadableDatabase().query(
-                        HistoryTable.TABLE_HISTORY, null, null, null, null, null, null );
+
+                Cursor cursor = updateDBCursor(helper);
 
                 changeCursor(cursor);
 

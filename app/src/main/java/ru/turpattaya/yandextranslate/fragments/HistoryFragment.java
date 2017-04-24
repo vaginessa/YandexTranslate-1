@@ -42,7 +42,7 @@ public class HistoryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rowView = inflater.inflate(R.layout.fragment_history, container, false);
-
+        setHasOptionsMenu(true);
         listHistory = (ListView) rowView.findViewById(R.id.list_history);
 
         populateHistoryFragment();
@@ -51,13 +51,23 @@ public class HistoryFragment extends Fragment {
     }
 
 
+
+    public void refreshView() {
+        MySQLiteHelper helper = new MySQLiteHelper(getContext());
+        Cursor cursor = helper.getReadableDatabase().query(
+                HistoryTable.TABLE_HISTORY, null, null, null, null, null, null );
+
+       adapter.changeCursor(cursor);
+    }
+
     private void populateHistoryFragment() {
         MySQLiteHelper helper = new MySQLiteHelper(getContext());
         Cursor cursor = helper.getReadableDatabase().query(
                 HistoryTable.TABLE_HISTORY, null, null, null, null, null, null );
-        HistoryAdapter adapter = new HistoryAdapter(getContext(), cursor);
+        adapter = new HistoryAdapter(getContext(), cursor);
         listHistory.setAdapter(adapter);
     }
+
 
     @Override
     public void onAttach(Context context) {
@@ -83,6 +93,7 @@ public class HistoryFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         switch (item.getItemId()) {
             case R.id.menu_delete:
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
@@ -106,7 +117,9 @@ public class HistoryFragment extends Fragment {
                                         null,
                                         null
                                 );
-                                helper.getWritableDatabase().execSQL("DROP TABLE IF EXISTS" + HistoryTable.TABLE_HISTORY);
+
+                                helper.getWritableDatabase().delete(HistoryTable.TABLE_HISTORY, null, null);
+                                helper.close();
 
                                 HistoryAdapter adapter = new HistoryAdapter(getContext(), cursor);
                                 listHistory.setAdapter(adapter);
@@ -119,6 +132,10 @@ public class HistoryFragment extends Fragment {
                                 dialog.dismiss();
                             }
                         });
+                AlertDialog alertDialog = alertDialogBuilder.create();
+
+                // show it
+                alertDialog.show();
 
                 return true;
 
