@@ -1,4 +1,4 @@
-package ru.turpattaya.yandextranslate;
+package ru.turpattaya.yandextranslate.DataBase;
 
 
         import android.content.Context;

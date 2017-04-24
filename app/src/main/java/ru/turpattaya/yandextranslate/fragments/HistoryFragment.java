@@ -1,16 +1,23 @@
-package ru.turpattaya.yandextranslate;
+package ru.turpattaya.yandextranslate.fragments;
 
 import android.content.*;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ListView;
+
+import ru.turpattaya.yandextranslate.HistoryAdapter;
+import ru.turpattaya.yandextranslate.DataBase.HistoryTable;
+import ru.turpattaya.yandextranslate.DataBase.MySQLiteHelper;
+import ru.turpattaya.yandextranslate.R;
 
 public class HistoryFragment extends Fragment {
 
@@ -37,8 +44,6 @@ public class HistoryFragment extends Fragment {
         View rowView = inflater.inflate(R.layout.fragment_history, container, false);
 
         listHistory = (ListView) rowView.findViewById(R.id.list_history);
-
-
 
         populateHistoryFragment();
 
@@ -68,6 +73,57 @@ public class HistoryFragment extends Fragment {
         else
             throw new RuntimeException(context.toString()
                     + " must implement HistoryFragmentAddFavoriteHost (ArticleListFragmentHost!)");
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_history_and_favorite, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_delete:
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+// TODO  ДОДЕЛАТЬ УДАЛЕНИЕ
+                // set title
+                alertDialogBuilder.setTitle("Your Title");
+
+                // set dialog message
+                alertDialogBuilder
+                        .setMessage("Удалить все данные из истории?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                MySQLiteHelper helper = new MySQLiteHelper(getContext());
+                                Cursor cursor = helper.getWritableDatabase().query(
+                                        HistoryTable.TABLE_HISTORY,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null
+                                );
+                                helper.getWritableDatabase().execSQL("DROP TABLE IF EXISTS" + HistoryTable.TABLE_HISTORY);
+
+                                HistoryAdapter adapter = new HistoryAdapter(getContext(), cursor);
+                                listHistory.setAdapter(adapter);
+                                dialog.dismiss();
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                dialog.dismiss();
+                            }
+                        });
+
+                return true;
+
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     // Метод жизненного цикла фрагмента.

@@ -19,6 +19,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import ru.turpattaya.yandextranslate.DataBase.HistoryTable;
+import ru.turpattaya.yandextranslate.DataBase.MySQLiteHelper;
+import ru.turpattaya.yandextranslate.Dialogs.InLanguageDialog;
+import ru.turpattaya.yandextranslate.Dialogs.OutLanguageDialog;
 import ru.yandex.speechkit.Error;
 import ru.yandex.speechkit.Recognizer;
 import ru.yandex.speechkit.SpeechKit;
@@ -49,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
     String textForTranslate, inLanguageToolbarPref, outLanguageToolbarPref, langCodePref, inLangKey, outLangKey;
 
     SharedPreferences preferences;
+
     public static final String IN_LANG_TOOLBAR_PREF = "IN_LANG_TOOLBAR_PREF";
     public static final String OUT_LANG_TOOLBAR_PREF = "OUT_LANG_TOOLBAR_PREF";
     public static final String LANG_CODE_PREF = "LANG_CODE_PREF";
@@ -56,15 +61,12 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
     public static final String OUT_LANG_KEY = "OUT_LANG_KEY";
 
     SQLiteDatabase db;
-    HistoryAdapter adapter;
-
-    public MainActivity() {
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -86,26 +88,7 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
         dictTranscriptionResult = (TextView) findViewById(R.id.main_text_dict_transcription);
         /*dictTrResult = (TextView) findViewById(R.id.main_text_dict_tr_result);*/
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        inLanguageToolbarPref = preferences.getString("IN_LANG_TOOLBAR_PREF", null); //если что-то есть в preference , то мы это забираем
-        outLanguageToolbarPref = preferences.getString("OUT_LANG_TOOLBAR_PREF", null);
-        langCodePref = preferences.getString("LANG_CODE_PREF", null);
-        inLangKey = preferences.getString("IN_LANG_KEY", null);
-        outLangKey = preferences.getString("OUT_LANG_KEY", null);
-
-        if (inLanguageToolbarPref != null && outLanguageToolbarPref != null && langCodePref != null) {
-            inLanguageToolbar.setText(inLanguageToolbarPref);
-            outLanguageToolbar.setText(outLanguageToolbarPref);
-        } else {
-            inLanguageToolbar.setText("английский");
-            outLanguageToolbar.setText("русский");
-            langCodePref = "en-ru";
-            inLangKey = "en";
-            outLangKey = "ru";
-            inLanguageToolbarPref = inLanguageToolbar.getText().toString();
-            outLanguageToolbarPref = outLanguageToolbar.getText().toString();
-            saveDateToSharedPreference();
-        }
+        checkPreferences();
 
         inLanguageToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,27 +110,8 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
         translateDirectionToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String changeLang = "";
-                String getInLang = preferences.getString(IN_LANG_TOOLBAR_PREF, null);
-                String getOutLang = preferences.getString(OUT_LANG_TOOLBAR_PREF, null);
-
-                changeLang = getInLang;
-                getInLang = getOutLang;
-                getOutLang = changeLang;
-                String changeKeys = "";
-                changeKeys = inLangKey;
-                inLangKey = outLangKey;
-                outLangKey = changeKeys;
-                inLanguageToolbar.setText(getInLang);
-                outLanguageToolbar.setText(getOutLang);
-                getPairLangsToRequest();
-                saveDateToSharedPreference();
-                if (tvOut != null) {
-                    String changeWord = tvOut.getText().toString();
-                    etIn.setText(changeWord);
-                }
+                reverseLanguageInToolbar();
                 loadTranslate();
-
             }
         });
 
@@ -171,22 +135,12 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
                     @Override
                     public void run() {
                         loadTranslate();
-                        String text = etIn.getText().toString();
-                        String[] words = text.split("\\s+");
-                        if (words.length < 2 && words.length >0) {
-                            loadDictionary();
-                        } else {
-                            dictTranslateResult.setText("");
-                            dictPosResult.setText("");
-                            dictTranscriptionResult.setText("");
-                        }
+                        checkCountWordsForDictionary();
                     }
                 };
                 handler.postDelayed(runnable, 2000);
             }
         });
-
-        
 
         imageClearEtMain = (ImageView) findViewById(R.id.main_image_clear);
         imageClearEtMain.setOnClickListener(new View.OnClickListener() {
@@ -227,49 +181,135 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
         imageMicrophoneMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                etIn.setText("");
-                Intent intent = new Intent(MainActivity.this, RecognizerActivity.class);
-                intent.putExtra(RecognizerActivity.EXTRA_MODEL, Recognizer.Model.QUERIES);
-                intent.putExtra(RecognizerActivity.EXTRA_LANGUAGE, Recognizer.Language.RUSSIAN);
-                startActivityForResult(intent, REQUEST_CODE);
+                recVoice();
+
             }
         });
 
         imageReproductionTextInMain.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                String textVocal = etIn.getText().toString();
-                if (TextUtils.isEmpty(textVocal)) {
-                    Toast.makeText(MainActivity.this, "Нечего воспроизводить!", Toast.LENGTH_SHORT).show();
-                } else {
-                    resetVocalizer();
-                    vocalizer = Vocalizer.createVocalizer(Vocalizer.Language.RUSSIAN, textVocal, true, Vocalizer.Voice.ERMIL);
-                    vocalizer.setListener(MainActivity.this);
-                    vocalizer.start();
-                }
+            public void onClick(View v) {playTextIn();
             }
         });
 
         imageReproductionTextOutMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String textOutVocal = tvOut.getText().toString();
-                if (TextUtils.isEmpty(textOutVocal)) {
-                    Toast.makeText(MainActivity.this, "Нечего воспроизводить!", Toast.LENGTH_SHORT).show();
-                } else {
-                    resetVocalizer();
-                    if (OUT_LANG_KEY.equals("ru")) {
-                        vocalizer = Vocalizer.createVocalizer(Vocalizer.Language.RUSSIAN, textOutVocal, true, Vocalizer.Voice.ERMIL);
-                        vocalizer.setListener(MainActivity.this);
-                        vocalizer.start();
-                    } else if (OUT_LANG_KEY.equals("en")) {
-                        vocalizer = Vocalizer.createVocalizer(Vocalizer.Language.ENGLISH, textOutVocal, true, Vocalizer.Voice.ERMIL);
-                        vocalizer.setListener(MainActivity.this);
-                        vocalizer.start();
-                    }
-                }
+                playTextOut();
             }
         });
+    }
+
+    private void recVoice() {
+        etIn.setText("");
+        Intent intent = new Intent(MainActivity.this, RecognizerActivity.class);
+        intent.putExtra(RecognizerActivity.EXTRA_MODEL, Recognizer.Model.QUERIES);
+        intent.putExtra(RecognizerActivity.EXTRA_LANGUAGE, Recognizer.Language.RUSSIAN);
+        startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    private void playTextIn() {
+        String textVocal = etIn.getText().toString();
+        if (TextUtils.isEmpty(textVocal)) {
+            Toast.makeText(MainActivity.this, "Нечего воспроизводить!", Toast.LENGTH_SHORT).show();
+        } else {
+            resetVocalizer();
+            String inKey = preferences.getString("IN_LANG_KEY", null);
+            if (inKey.equals("ru")) {
+                vocalizer = Vocalizer.createVocalizer(Vocalizer.Language.RUSSIAN, textVocal, true, Vocalizer.Voice.ERMIL);
+                vocalizer.setListener(MainActivity.this);
+                vocalizer.start();
+            } else if (inKey.equals("en")) {
+                vocalizer = Vocalizer.createVocalizer(Vocalizer.Language.ENGLISH, textVocal, true, Vocalizer.Voice.ERMIL);
+                vocalizer.setListener(MainActivity.this);
+                vocalizer.start();
+            } else if (inKey.equals("uk")) {
+                vocalizer = Vocalizer.createVocalizer(Vocalizer.Language.UKRAINIAN, textVocal, true, Vocalizer.Voice.ERMIL);
+                vocalizer.setListener(MainActivity.this);
+                vocalizer.start();
+            }
+
+        }
+    }
+
+    private void playTextOut() {
+        String textOutVocal = tvOut.getText().toString();
+        if (TextUtils.isEmpty(textOutVocal)) {
+            Toast.makeText(MainActivity.this, "Нечего воспроизводить!", Toast.LENGTH_SHORT).show();
+        } else {
+            resetVocalizer();
+            String outKey = preferences.getString("OUT_LANG_KEY", null);
+            if (outKey.equals("ru")) {
+                vocalizer = Vocalizer.createVocalizer(Vocalizer.Language.RUSSIAN, textOutVocal, true, Vocalizer.Voice.ERMIL);
+                vocalizer.setListener(MainActivity.this);
+                vocalizer.start();
+            } else if (outKey.equals("en")) {
+                vocalizer = Vocalizer.createVocalizer(Vocalizer.Language.ENGLISH, textOutVocal, true, Vocalizer.Voice.ERMIL);
+                vocalizer.setListener(MainActivity.this);
+                vocalizer.start();
+            } else  if (outKey.equals("uk")) {
+                vocalizer = Vocalizer.createVocalizer(Vocalizer.Language.UKRAINIAN, textOutVocal, true, Vocalizer.Voice.ERMIL);
+                vocalizer.setListener(MainActivity.this);
+                vocalizer.start();
+            }
+        }
+    }
+
+    private void checkCountWordsForDictionary() {
+        String text = etIn.getText().toString();
+        String[] words = text.split("\\s+");
+        if (words.length < 2 && words.length >0) {
+            loadDictionary();
+        } else {
+            dictTranslateResult.setText("");
+            dictPosResult.setText("");
+            dictTranscriptionResult.setText("");
+        }
+    }
+
+    private void checkPreferences() {
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        inLanguageToolbarPref = preferences.getString("IN_LANG_TOOLBAR_PREF", null); //если что-то есть в preference , то мы это забираем
+        outLanguageToolbarPref = preferences.getString("OUT_LANG_TOOLBAR_PREF", null);
+        langCodePref = preferences.getString("LANG_CODE_PREF", null);
+        inLangKey = preferences.getString("IN_LANG_KEY", null);
+        outLangKey = preferences.getString("OUT_LANG_KEY", null);
+
+        if (inLanguageToolbarPref != null && outLanguageToolbarPref != null && langCodePref != null) {
+            inLanguageToolbar.setText(inLanguageToolbarPref);
+            outLanguageToolbar.setText(outLanguageToolbarPref);
+        } else {
+            inLanguageToolbar.setText("английский");
+            outLanguageToolbar.setText("русский");
+            langCodePref = "en-ru";
+            inLangKey = "en";
+            outLangKey = "ru";
+            inLanguageToolbarPref = inLanguageToolbar.getText().toString();
+            outLanguageToolbarPref = outLanguageToolbar.getText().toString();
+            saveDateToSharedPreference();
+        }
+    }
+
+    private void reverseLanguageInToolbar() {
+        String changeLang = "";
+        String getInLang = preferences.getString(IN_LANG_TOOLBAR_PREF, null);
+        String getOutLang = preferences.getString(OUT_LANG_TOOLBAR_PREF, null);
+
+        changeLang = getInLang;
+        getInLang = getOutLang;
+        getOutLang = changeLang;
+        String changeKeys = "";
+        changeKeys = inLangKey;
+        inLangKey = outLangKey;
+        outLangKey = changeKeys;
+        inLanguageToolbar.setText(getInLang);
+        outLanguageToolbar.setText(getOutLang);
+        getPairLangsToRequest();
+        saveDateToSharedPreference();
+        if (tvOut != null) {
+            String changeWord = tvOut.getText().toString();
+            etIn.setText(changeWord);
+        }
     }
 
     private void loadDictionary() {
@@ -353,7 +393,6 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
             tvOut.setText("");
         }
     }
-
 
     private void loadTranslate() {
         API api = new API();
@@ -440,8 +479,6 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
                 outLanguageToolbarPref+ " " +langCodePref+ " " + inLangKey+ " " + outLangKey);*/
     }
 
-
-
     private void addRec(String textIn, String textOut, String translateDirection, int directionIsFavorite) {
         MySQLiteHelper mDBHelper = new MySQLiteHelper(this);
         db = mDBHelper.getWritableDatabase();
@@ -488,6 +525,8 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
 
     @Override
     public void onSynthesisBegin(Vocalizer vocalizer) {
+        imageReproductionTextInMain.setClickable(false);
+        imageReproductionTextOutMain.setClickable(false);
         Toast.makeText(MainActivity.this, "Обрабатываем",  Toast.LENGTH_SHORT).show();
     }
 
@@ -498,12 +537,13 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
 
     @Override
     public void onPlayingBegin(Vocalizer vocalizer) {
-        Toast.makeText(MainActivity.this, "Воспроизведение",  Toast.LENGTH_SHORT).show();
+
     }
 
     @Override
     public void onPlayingDone(Vocalizer vocalizer) {
-        Toast.makeText(MainActivity.this, "Воспроизведение заверщено", Toast.LENGTH_SHORT).show();
+        imageReproductionTextInMain.setClickable(true);
+        imageReproductionTextOutMain.setClickable(true);
     }
 
     @Override

@@ -12,6 +12,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import ru.turpattaya.yandextranslate.DataBase.HistoryTable;
+import ru.turpattaya.yandextranslate.DataBase.MySQLiteHelper;
+
 
 public class MyContentProvider extends ContentProvider {
 

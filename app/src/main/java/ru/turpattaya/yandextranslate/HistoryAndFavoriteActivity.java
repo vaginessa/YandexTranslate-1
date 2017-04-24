@@ -1,8 +1,8 @@
 package ru.turpattaya.yandextranslate;
 
-import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.TabLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 
 import android.support.v4.app.Fragment;
@@ -11,7 +11,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 
-import android.view.LayoutInflater;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -22,6 +22,9 @@ import android.widget.ImageView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import ru.turpattaya.yandextranslate.fragments.FavoriteFragment;
+import ru.turpattaya.yandextranslate.fragments.HistoryFragment;
 
 
 public class HistoryAndFavoriteActivity extends AppCompatActivity implements HistoryFragment.HistoryFragmentAddFavoriteHost{
@@ -40,7 +43,21 @@ public class HistoryAndFavoriteActivity extends AppCompatActivity implements His
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTheme(R.style.AppTheme_NoActionBar);
         setContentView(R.layout.activity_history_and_favorite);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_history);
+        setSupportActionBar(toolbar);
+        {
+            ActionBar bar = getSupportActionBar();
+            if (bar != null) {
+                bar.setDisplayHomeAsUpEnabled(false);
+                bar.setDisplayShowTitleEnabled(false);
+                bar.setHomeButtonEnabled(false);
+            }
+
+
+        }
 
         footerTranslateImage = (ImageView) findViewById(R.id.footer_image_translate);
         footerFavoriteImage = (ImageView) findViewById(R.id.footer_image_favorite);

@@ -2,8 +2,6 @@ package ru.turpattaya.yandextranslate;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.widget.CursorAdapter;
@@ -11,9 +9,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import ru.turpattaya.yandextranslate.DataBase.HistoryTable;
+import ru.turpattaya.yandextranslate.DataBase.MySQLiteHelper;
 //Непонятно что делать с иконкой избранное , то ли здесь ее как-то заенять, то-ли новый адаптер для избранного создавать, а потом в коде как то
 
 public class HistoryAdapter extends CursorAdapter {
@@ -49,15 +49,14 @@ public class HistoryAdapter extends CursorAdapter {
         if (isFavoriteInt==1) {
             holder.isFavorite = true;
         }
-        // не отрисовывается после setBackgroundResource
+
         // holderItem.parentAdapter.notifyDataSetChanged();   //// не перерисовывает экран
         if (holder.isFavorite) {
-            /*holder.textOutHistory.setText("FAVORITE");*/
-
-            holder.imageFavoriteIcon.setBackgroundResource(R.drawable.ic_in_favorite_24dp);
+            holder.imageFavoriteIcon.setImageResource(R.drawable.ic_in_favorite_24dp);
         } else {
-            holder.imageFavoriteIcon.setBackgroundResource(R.drawable.ic_not_favorite_24dp);
+            holder.imageFavoriteIcon.setImageResource(R.drawable.ic_not_favorite_24dp);
         }
+
         final int id = cursor.getInt(cursor.getColumnIndex(HistoryTable.COLUMN_HISTORY_ID));
 
         holder.id = id;
@@ -69,9 +68,6 @@ public class HistoryAdapter extends CursorAdapter {
 
                 holderItem.isFavorite = !holderItem.isFavorite;
 
-                // сохранить значение в базу
-                // для адаптера вызвать notify нужно знать какой адаптер у этого айтема.
-
                 MySQLiteHelper helper = new MySQLiteHelper(v.getContext());
                 ContentValues values = new ContentValues();
 
@@ -79,7 +75,11 @@ public class HistoryAdapter extends CursorAdapter {
                 helper.getWritableDatabase().update(HistoryTable.TABLE_HISTORY, values, HistoryTable.COLUMN_HISTORY_ID
                         +" = '"+ holderItem.id + "'", null);
 
-                holderItem.parentAdapter.notifyDataSetChanged();   ////
+                Cursor cursor = helper.getReadableDatabase().query(
+                        HistoryTable.TABLE_HISTORY, null, null, null, null, null, null );
+
+                changeCursor(cursor);
+
             }
         });
     }

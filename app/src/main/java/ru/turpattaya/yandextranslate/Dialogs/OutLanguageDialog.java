@@ -1,4 +1,4 @@
-package ru.turpattaya.yandextranslate;
+package ru.turpattaya.yandextranslate.Dialogs;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -9,6 +9,9 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+
+import ru.turpattaya.yandextranslate.MainActivity;
+import ru.turpattaya.yandextranslate.R;
 
 
 public class OutLanguageDialog extends DialogFragment {
