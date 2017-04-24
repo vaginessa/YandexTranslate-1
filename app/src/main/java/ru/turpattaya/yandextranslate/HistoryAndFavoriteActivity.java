@@ -1,5 +1,6 @@
 package ru.turpattaya.yandextranslate;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +11,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -22,22 +24,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class HistoryAndFavoriteActivity extends AppCompatActivity implements HistoryFragment.HistoryFragmentHost {
+public class HistoryAndFavoriteActivity extends AppCompatActivity implements HistoryFragment.HistoryFragmentAddFavoriteHost{
 
+    HistoryFragment historyFragment;
+    FavoriteFragment favoriteFragment;
 
     private TabLayout tabLayout;
     private ViewPager viewPager;
 
     private ImageView footerTranslateImage, footerFavoriteImage, footerSettingsImage;
+    boolean isFavorite = false;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history_and_favorite);
+
         footerTranslateImage = (ImageView) findViewById(R.id.footer_image_translate);
         footerFavoriteImage = (ImageView) findViewById(R.id.footer_image_favorite);
         footerSettingsImage = (ImageView) findViewById(R.id.footer_image_settings);
+
 
         if (android.os.Build.VERSION.SDK_INT >= 21) {
             Window window = this.getWindow();
@@ -73,21 +81,24 @@ public class HistoryAndFavoriteActivity extends AppCompatActivity implements His
 
         setupViewPager(viewPager);// будет добавлять объекты в адаптер
         tabLayout.setupWithViewPager(viewPager);
+
+
     }
+
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new HistoryFragment(), "История");
         adapter.addFragment(new FavoriteFragment(), "Избранное");
-
         viewPager.setAdapter(adapter);
-
     }
 
     @Override
-    public void historySelected(int historyId, String historyTextIn, String historyTextOut, String historyTranslateDirection) {
+    public void addToFavorite(int historyId, String historyTextIn, String historyTextOut, String historyTranslateDirection, int imageFavorite) {
 
     }
+
+
 
     private static class ViewPagerAdapter extends FragmentPagerAdapter {
 

@@ -24,12 +24,15 @@
 
             <EditText
                 android:id="@+id/main_edit_text_in"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textAutoComplete|text"
+                android:inputType="textMultiLine"
+                android:scrollbars="vertical"
                 android:focusable="true"
                 android:hint="Введите текст"
                 android:focusableInTouchMode="true"
+                android:layout_toStartOf="@+id/main_microphone"
+                android:layout_marginBottom="20dp"
                 android:background="@android:color/transparent"
                 android:layout_alignParentStart="true"/>
 
@@ -48,7 +51,7 @@
                 android:layout_height="wrap_content" />
 
             <ImageView
-                android:id="@+id/main_voice_text_in"
+                android:id="@+id/main_reproduction_text_in"
                 android:src="@drawable/ic_volume_up_black_24dp"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
@@ -87,7 +90,16 @@
         android:layout_margin="10dp"
         android:layout_below="@+id/main_text_dict_translate_result"/>
 
+    <TextView
+        android:id="@+id/main_vocalizer_stats"
+        android:gravity="bottom"
+        android:layout_centerInParent="true"
+        android:paddingBottom="100dp"
 
+
+        android:hint="affsdfsdfsdf"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" />
 
 
     <include layout="@layout/footer"

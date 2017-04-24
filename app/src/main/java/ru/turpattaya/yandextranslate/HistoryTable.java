@@ -9,7 +9,7 @@ public class HistoryTable {
     public static final String COLUMN_HISTORY_TEXTIN = "textIn";
     public static final String COLUMN_HISTORY_TEXTOUT = "textOut";
     public static final String COLUMN_HISTORY_TRANSLATE_DIRECTION = "translateDirection";
-    public static final String COLUMN_DIRECTION_IS_FAVORITE = "false";
+    public static final String COLUMN_DIRECTION_IS_FAVORITE = "isFavorite";
 
     private static final String HISTORY_CREATE = "create table "
             + TABLE_HISTORY + "("
@@ -22,7 +22,7 @@ public class HistoryTable {
             + COLUMN_HISTORY_TRANSLATE_DIRECTION
             + " text not null, "
             + COLUMN_DIRECTION_IS_FAVORITE
-            + " boolean not null "
+            + " integer not null "
             + ");";
 
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {

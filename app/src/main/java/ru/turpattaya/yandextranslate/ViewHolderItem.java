@@ -13,7 +13,10 @@ public class ViewHolderItem {
         public TextView textInHistory;
         public TextView textOutHistory;
         public TextView textTranslationDirectionHistory;
-        String favorite;
 
+        public boolean isFavorite;
 
+        public int id ;
+
+        HistoryAdapter parentAdapter;
 }

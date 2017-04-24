@@ -3,16 +3,14 @@ package ru.turpattaya.yandextranslate;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -21,20 +19,32 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Timer;
+import ru.yandex.speechkit.Error;
+import ru.yandex.speechkit.Recognizer;
+import ru.yandex.speechkit.SpeechKit;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import ru.turpattaya.yandextranslate.JsonDictionary.JsonDictionaryResult;
+import ru.yandex.speechkit.Synthesis;
+import ru.yandex.speechkit.Vocalizer;
+import ru.yandex.speechkit.VocalizerListener;
+import ru.yandex.speechkit.gui.RecognizerActivity;
 
-public class MainActivity extends AppCompatActivity {
+import static ru.turpattaya.yandextranslate.ApiKey.KEY_SPEECHKIT_YANDEX;
 
-    private TextView inLanguageToolbar, outLanguageToolbar, tvOut;
+public class MainActivity extends AppCompatActivity implements VocalizerListener {
+
+    private TextView inLanguageToolbar, outLanguageToolbar, tvOut, textVocalizerStats;
     private TextView dictTranslateResult, dictPosResult, dictTranscriptionResult, dictTrResult;
     private EditText etIn;
 
-    private ImageView clearEtMain, footerTranslateImage, footerFavoriteImage, footerSettingsImage;
+    private ImageView imageClearEtMain, imageMicrophoneMain, imageReproductionTextInMain,
+            footerTranslateImage, footerFavoriteImage, footerSettingsImage;
+
+    public static final int REQUEST_CODE = 999;
+    private Vocalizer vocalizer;
 
     String textForTranslate, inLanguageToolbarPref, outLanguageToolbarPref, langCodePref, inLangKey, outLangKey;
 
@@ -46,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String OUT_LANG_KEY = "OUT_LANG_KEY";
 
     SQLiteDatabase db;
-    MyCursorAdapter adapter;
+    HistoryAdapter adapter;
 
     public MainActivity() {
     }
@@ -152,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 handler.removeCallbacks(runnable);
+                resetVocalizer();
             }
 
             @Override
@@ -174,8 +185,8 @@ public class MainActivity extends AppCompatActivity {
                 handler.postDelayed(runnable, 2000);
             }
         });
-        clearEtMain = (ImageView) findViewById(R.id.main_image_clear);
-        clearEtMain.setOnClickListener(new View.OnClickListener() {
+        imageClearEtMain = (ImageView) findViewById(R.id.main_image_clear);
+        imageClearEtMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 etIn.setText("");
@@ -201,6 +212,37 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(intent);
+            }
+        });
+
+        SpeechKit.getInstance().configure(getApplicationContext(), KEY_SPEECHKIT_YANDEX);
+
+        imageMicrophoneMain = (ImageView) findViewById(R.id.main_microphone);
+        imageReproductionTextInMain = (ImageView) findViewById(R.id.main_reproduction_text_in);
+
+        imageMicrophoneMain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                etIn.setText("");
+                Intent intent = new Intent(MainActivity.this, RecognizerActivity.class);
+                intent.putExtra(RecognizerActivity.EXTRA_MODEL, Recognizer.Model.QUERIES);
+                intent.putExtra(RecognizerActivity.EXTRA_LANGUAGE, Recognizer.Language.RUSSIAN);
+                startActivityForResult(intent, REQUEST_CODE);
+            }
+        });
+        textVocalizerStats = (TextView) findViewById(R.id.main_vocalizer_stats);
+        imageReproductionTextInMain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String textVocal = etIn.getText().toString();
+                if (TextUtils.isEmpty(textVocal)) {
+                    Toast.makeText(MainActivity.this, "Нечего воспроизводить!", Toast.LENGTH_SHORT).show();
+                } else {
+                    resetVocalizer();
+                    vocalizer = Vocalizer.createVocalizer(Vocalizer.Language.RUSSIAN, textVocal, true, Vocalizer.Voice.ERMIL);
+                    vocalizer.setListener(MainActivity.this);
+                    vocalizer.start();
+                }
             }
         });
     }
@@ -301,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
                    /* Log.d("happy", response.body().getText().get(0));*/
                         String textOut = response.body().getText().get(0);
                         tvOut.setText(textOut);
-                            addRec(textForTranslate, textOut, langCodePref, "false");
+                            addRec(textForTranslate, textOut, langCodePref, 0);
 
                     }
                 }
@@ -375,9 +417,8 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    private void addRec(String textIn, String textOut, String translateDirection, String directionIsFavorite) {
+    private void addRec(String textIn, String textOut, String translateDirection, int directionIsFavorite) {
         MySQLiteHelper mDBHelper = new MySQLiteHelper(this);
-
         db = mDBHelper.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(HistoryTable.COLUMN_HISTORY_TEXTIN, textIn);
@@ -391,6 +432,63 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         db.close();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE) {
+            if (resultCode == RecognizerActivity.RESULT_OK && data != null) {
+                final String result = data.getStringExtra(RecognizerActivity.EXTRA_RESULT);
+                etIn.setText(result);
+            } else if (resultCode == RecognizerActivity.RESULT_ERROR) {
+                String error = ((ru.yandex.speechkit.Error) data.getSerializableExtra(RecognizerActivity.EXTRA_ERROR)).getString();
+                etIn.setText(error);
+            }
+        }
+    }
+
+    private void resetVocalizer() {
+        if (vocalizer != null) {
+            vocalizer.cancel();
+            vocalizer = null;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        resetVocalizer();
+    }
+
+    private void updateStateText(final String text) {
+        textVocalizerStats.setText(text);
+    }
+
+    @Override
+    public void onSynthesisBegin(Vocalizer vocalizer) {
+        updateStateText("Synthesis begin");
+    }
+
+    @Override
+    public void onSynthesisDone(Vocalizer vocalizer, Synthesis synthesis) {
+        updateStateText("Synthesis done");
+    }
+
+    @Override
+    public void onPlayingBegin(Vocalizer vocalizer) {
+        updateStateText("Playing begin");
+    }
+
+    @Override
+    public void onPlayingDone(Vocalizer vocalizer) {
+        updateStateText("Playing done");
+    }
+
+    @Override
+    public void onVocalizerError(Vocalizer vocalizer, Error error) {
+        updateStateText("Error occurred " + error.getString());
+        resetVocalizer();
     }
 }
 
