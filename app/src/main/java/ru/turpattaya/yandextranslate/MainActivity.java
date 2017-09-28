@@ -88,7 +88,6 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
         dictTranslateResult = (TextView) findViewById(R.id.main_text_dict_translate_result);
         dictPosResult = (TextView) findViewById(R.id.main_text_dict_pos_result);
         dictTranscriptionResult = (TextView) findViewById(R.id.main_text_dict_transcription);
-        /*dictTrResult = (TextView) findViewById(R.id.main_text_dict_tr_result);*/
 
         checkPreferences();
 
