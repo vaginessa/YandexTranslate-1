@@ -553,6 +553,11 @@ public class MainActivity extends AppCompatActivity implements VocalizerListener
         Toast.makeText(MainActivity.this, "Error occurred " + error.getString(), Toast.LENGTH_SHORT).show();
         resetVocalizer();
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 }
 
 
